@@ -1,5 +1,6 @@
 #pragma once
 #include<string>
+#include<vector>
 using namespace std;
 struct spectra
 {
@@ -22,7 +23,11 @@ struct spectra
 	int mc_sites;
 	double afm_shift;
 	int others;
+	int marker = 0;
 };
 
-ostream& operator<<(ostream& os, spectra& s);
-istream& operator>>(istream& os, spectra& s);
+ostream& operator<<(ostream& os, const spectra& s);
+istream& operator>>(istream& os, vector<spectra>& list_result);
+void mark(vector<spectra>& list);
+bool sortbyseq(spectra& a, spectra& b);
+bool sortbymarker(spectra& a, spectra& b);
