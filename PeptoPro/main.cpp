@@ -38,6 +38,8 @@ int main(int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列fasta
 	}
 	vector<spectra> list_result;
 	inres >> list_result;
+	mark(list_result);
+	vector<pro> list_pro;
 
 }
 
@@ -95,15 +97,14 @@ void mark(vector<spectra>& list)
 			continue;
 		else
 			list[i].marker = mark++;//赋值后更新
-		for (int j = i + 1; j < list.size(); i++) {
+		for (int j = i + 1; j < list.size(); j++) {
 			if (list[j].marker != 0)
 				continue;
 			if (list[j].seq.find(list[i].seq) != string::npos)//如果找到了的话
 				list[j].marker = list[i].marker;
 		}
 	}
-		
-
+	sort(list.begin(), list.end(), sortbymarker);
 }
 
 

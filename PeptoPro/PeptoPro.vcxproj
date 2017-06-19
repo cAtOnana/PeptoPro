@@ -112,6 +112,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="reflect.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pFind_PairResearch.h" />
