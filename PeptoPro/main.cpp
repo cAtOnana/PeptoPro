@@ -88,14 +88,29 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 
 void mark(vector<spectra>& list)
 {
-	sort(list.begin(),list.end(), sortbyseq);
+	sort(list.begin(),list.end(), sortbyleg);
+	int mark = 1;
+	for (int i = 0; i < list.size(); i++) {
+		if (list[i].marker != 0)
+			continue;
+		else
+			list[i].marker = mark++;//赋值后更新
+		for (int j = i + 1; j < list.size(); i++) {
+			if (list[j].marker != 0)
+				continue;
+			if (list[j].seq.find(list[i].seq) != string::npos)//如果找到了的话
+				list[j].marker = list[i].marker;
+		}
+	}
+		
+
 }
 
 
 
-bool sortbyseq(spectra & a, spectra & b)
+bool sortbyleg(spectra & a, spectra & b)
 {
-	return a.seq<b.seq;
+	return a.seq.length()<b.seq.length();
 }
 
 bool sortbymarker(spectra & a, spectra & b)
