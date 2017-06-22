@@ -259,3 +259,7 @@ paket-files/
 # Python Tools for Visual Studio (PTVS)
 __pycache__/
 *.pyc
+/PeptoPro/ENSP-NM.txt
+/PeptoPro/Homo_sapiens.GRCh38.pep.all_cnew.fa
+/PeptoPro/result.txt
+/PeptoPro/非同义突变.txt

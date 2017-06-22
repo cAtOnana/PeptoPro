@@ -40,7 +40,11 @@ int main(int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列fasta
 	inres >> list_result;
 	mark(list_result);
 	vector<pro> list_pro;
-
+	inmrn >> list_pro;
+	fillhseq(inref, list_pro);
+	//输入对照表
+	fillnm(incom, list_pro);
+	//开始比对
 }
 
 
@@ -74,6 +78,7 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 		{
 			in >> temp.modi;
 			temp.modi = ch + temp.modi;
+			temp.is_modi = true;
 		}
 		in >> temp.spec;
 		in >> temp.prot;

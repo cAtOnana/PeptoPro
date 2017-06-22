@@ -11,12 +11,11 @@ struct pro {
 	char mutataa;
 	int pos;
 	std::string hseq="";
+	std::string nm;
 };
 
-
-struct mirror {
-	std::string ensp="";
-	std::string nm[10];
-};
 
 istream& operator>>(istream& is, vector<pro> list);
+bool sortbyensp(pro& a, pro& b);
+void fillhseq(istream& is,vector<pro> list);
+void fillnm(istream&is, vector<pro>list);

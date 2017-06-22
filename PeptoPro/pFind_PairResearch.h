@@ -24,6 +24,7 @@ struct spectra
 	double afm_shift;
 	int others;
 	int marker = 0;
+	bool is_modi = false;
 };
 
 ostream& operator<<(ostream& os, const spectra& s);
