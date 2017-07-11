@@ -2,9 +2,11 @@
 #include"pFind_PairResearch.h"
 #include<vector>
 #include<algorithm>
+//result文件中肽段是以nm号标记的，非同义突变文件中的蛋白质序列是以ensp号标记的，现通过清理空白项后的对照表建立映射将两者对应起来后进行比对；无突变的肽段直接比对即可，有突变的肽段先在对应蛋白质序列中进行突变转换然后比对
 using namespace std;
-
-int main(int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列fasta
+int argc = 5;
+char* argv[5] = { "aaa","result.txt","非同义突变.txt","ENSP-NM.txt","Homo_sapiens.GRCh38.pep.all_cnew.fa" };
+int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列fasta
 	char* logname = "PeptoPro.log";
 	ofstream log(logname);
 	if (argc != 5) {
@@ -38,13 +40,44 @@ int main(int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列fasta
 	}
 	vector<spectra> list_result;
 	inres >> list_result;
-	mark(list_result);
+	int markcount =mark(list_result);
+	for (int i = 0; i < list_result.size();i++)
+		log << list_result[i];
+
 	vector<pro> list_pro;
 	inmrn >> list_pro;
 	fillhseq(inref, list_pro);
 	//输入对照表
 	fillnm(incom, list_pro);
 	//开始比对
+	bool* cout_modi = new bool[markcount] {false};
+	bool* cout_no = new bool[markcount] {false};
+	///此两数组用于记录某一mark号对应的数据组能否输出，只有两者皆为true（即某一组中至少有一对经过验证的突变对）才能输出。故比对时也应按照此原则对应地更新数组。
+	int saving = 0;
+	///记录匹配到的list_pro的坐标，方便下一次匹配
+	for (int i = 0; i < list_pro.size();i++) {
+		if (list_result[0].is_modi == false) {
+			if (list_pro[i].hseq.find(list_result[0].seq) != string::npos) {
+				saving = i;
+				cout_modi[list_result[0].marker] = true;
+			}
+		}
+		else if (list_result[0].is_modi == true) {
+			string temp = list_pro[i].hseq;
+			temp.replace(list_pro[i].pos, 1,1 ,list_pro[i].mutataa);
+			if (temp.find(list_result[0].seq ) != string::npos){
+				saving = i;
+				cout_no[list_result[0].marker] = true;
+			}
+		}
+		
+	}
+	for (int i = 0; i < list_result.size();) {//更新放在分支后
+		for (int j = 0; j < list_pro.size(); j++) {
+
+		}
+	}
+		
 }
 
 
@@ -93,10 +126,10 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 	return in;
 }
 
-void mark(vector<spectra>& list)
+int mark(vector<spectra>& list)
 {
 	sort(list.begin(),list.end(), sortbyleg);
-	int mark = 1;
+	int mark = 1;//注意，mark从1开始。
 	for (int i = 0; i < list.size(); i++) {
 		if (list[i].marker != 0)
 			continue;
@@ -110,6 +143,7 @@ void mark(vector<spectra>& list)
 		}
 	}
 	sort(list.begin(), list.end(), sortbymarker);
+	return mark;//返回mark，用于建立bool数组判断是否可输出。
 }
 
 

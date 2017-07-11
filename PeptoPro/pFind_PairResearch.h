@@ -29,6 +29,6 @@ struct spectra
 
 ostream& operator<<(ostream& os, const spectra& s);
 istream& operator>>(istream& os, vector<spectra>& list_result);
-void mark(vector<spectra>& list);
+int mark(vector<spectra>& list);
 bool sortbyleg(spectra& a, spectra& b);
 bool sortbymarker(spectra& a, spectra& b);
