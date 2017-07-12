@@ -53,30 +53,84 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 	bool* cout_modi = new bool[markcount] {false};
 	bool* cout_no = new bool[markcount] {false};
 	///此两数组用于记录某一mark号对应的数据组能否输出，只有两者皆为true（即某一组中至少有一对经过验证的突变对）才能输出。故比对时也应按照此原则对应地更新数组。
-	int saving = 0;
-	///记录匹配到的list_pro的坐标，方便下一次匹配
-	for (int i = 0; i < list_pro.size();i++) {
-		if (list_result[0].is_modi == false) {
-			if (list_pro[i].hseq.find(list_result[0].seq) != string::npos) {
-				saving = i;
-				cout_modi[list_result[0].marker] = true;
+	int pos_saving = 0, mark_saving = 0;
+	///pos_saving记录匹配到的list_pro的坐标，方便下一次匹配；mark_saving用于记录当前组号
+	///mark_saving记录当前正在执行匹配的肽序列所属的组；同时用于判定pos_saving的使用与否，解决边界问题（因为pos_saving是进入直接比对流程的）
+	for (int i = 0; i < list_result.size();) {//更新放在分支末
+		if (list_result[i].marker != mark_saving) {
+			if (list_result[i].is_modi == false) {
+				int j = 0;
+				for (; j < list_pro.size(); j++) {
+					if (list_pro[j].nm.find(list_result[i].prot)!=string::npos && list_pro[j].hseq.find(list_result[i].seq) != string::npos) {//找到了的话
+						pos_saving = j;
+						mark_saving = list_result[i].marker;
+						cout_no[mark_saving] = true;
+						i++;//update
+						break;
+					}
+					else {//找不到的话，擦除，然后继续循环
+						vector<spectra>::iterator itor = list_result.begin() + i;
+						list_result.erase(itor);//erase & update
+					}
+				}
+			}
+			else {//类似上面
+				int j = 0;
+				for (; j < list_pro.size(); j++) {
+					string temp = list_pro[j].hseq;
+					temp = temp.replace(list_pro[j].pos, 1, 1, list_pro[j].mutataa);//A ?在目标肽链上有多个突变，怎么办？
+					string temp2 = list_result[i].prot;
+					//此处将temp2改为突变序列
+					if (list_pro[j].nm.find(list_result[i].prot) != string::npos) {
+						auto pos_find = temp.find(temp2);
+						if (pos_find != string::npos && pos_find + pos_mut == list_pro[j].pos) {//此处pos_mut是result中肽段突变位点的坐标，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
+							pos_saving = j;
+							mark_saving = list_result[i].marker;
+							cout_modi[mark_saving] = true;
+							i++;//update
+							break;
+						}
+					}
+					else {
+						vector<spectra>::iterator itor = list_result.begin() + i;
+						list_result.erase(itor);//erase & update
+					}
+				}
 			}
 		}
-		else if (list_result[0].is_modi == true) {
-			string temp = list_pro[i].hseq;
-			temp.replace(list_pro[i].pos, 1,1 ,list_pro[i].mutataa);
-			if (temp.find(list_result[0].seq ) != string::npos){
-				saving = i;
-				cout_no[list_result[0].marker] = true;
+		else {
+			if (list_result[i].is_modi == false) {
+				if (list_pro[pos_saving].hseq.find(list_result[i].seq) != string::npos) {
+					cout_no[mark_saving] = true;
+					i++;//update
+					break;
+				}
+				else {
+					vector<spectra>::iterator itor = list_result.begin()+i;
+					list_result.erase(itor);//erase & update
+				}
+			}
+			else {
+				string temp = list_pro[pos_saving].hseq;
+				temp = temp.replace(list_pro[pos_saving].pos, 1, 1, list_pro[pos_saving].mutataa);//问题A
+				string temp2 = list_result[i].prot;
+				//此处将temp2改为突变序列
+				if (list_pro[pos_saving].nm.find(list_result[i].prot) != string::npos) {
+					auto pos_find = temp.find(temp2);
+					if (pos_find != string::npos && pos_find + pos_mut == list_pro[j].pos) {//此处pos_mut是result中肽段突变位点的坐标，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
+						cout_modi[mark_saving] = true;
+						i++;//update
+						break;
+					}
+				}
+				else {
+					vector<spectra>::iterator itor = list_result.begin() + i;
+					list_result.erase(itor);// erase & update
+				}
 			}
 		}
-		
 	}
-	for (int i = 0; i < list_result.size();) {//更新放在分支后
-		for (int j = 0; j < list_pro.size(); j++) {
-
-		}
-	}
+	
 		
 }
 
@@ -126,7 +180,7 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 	return in;
 }
 
-int mark(vector<spectra>& list)
+int mark(vector<spectra>& list)//将数据分成几个大组，每组有相同的最小子序列，且不重复，但此函数未解决同时包含多条不同的最小子序列（从而可以归属于多个不同组）的问题。但愿数据集中没有这样的肽段序列
 {
 	sort(list.begin(),list.end(), sortbyleg);
 	int mark = 1;//注意，mark从1开始。
