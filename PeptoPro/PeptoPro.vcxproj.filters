@@ -21,6 +21,9 @@
     <ClCompile Include="reflect.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="pFind_PairResearch.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="reflect.h">

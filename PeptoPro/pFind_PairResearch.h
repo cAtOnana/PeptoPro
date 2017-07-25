@@ -25,10 +25,16 @@ struct spectra
 	int others;
 	int marker = 0;
 	bool is_modi = false;
+	int mut_count=0;//记录突变位点个数
 };
-
+struct mut_pep_inform {
+	string mutpep;
+	int* pos_mut = nullptr;
+	int size=0;
+};
 ostream& operator<<(ostream& os, const spectra& s);
 istream& operator>>(istream& os, vector<spectra>& list_result);
 int mark(vector<spectra>& list);
 bool sortbyleg(spectra& a, spectra& b);
 bool sortbymarker(spectra& a, spectra& b);
+mut_pep_inform& pepmutation(const spectra& p);
