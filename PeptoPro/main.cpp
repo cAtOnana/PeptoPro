@@ -16,7 +16,7 @@ struct pro_hash {
 };
 struct pro_compare {
 	bool operator()(const string& a1, const string& a2) const {
-		return a1.find(a2)!=string::npos;//试试此处不是相等判断而是包含判断时是否可行
+		return a1==a2;//试试此处不是相等判断而是包含判断时是否可行
 	}
 };
 typedef unordered_map<string, int, pro_hash, pro_compare> ProIndexMap;
@@ -70,9 +70,22 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 	int pos_saving = 0, mark_saving = 0;
 	///pos_saving记录匹配到的list_pro的坐标，方便下一次匹配；mark_saving用于记录当前组号
 	///mark_saving记录当前正在执行匹配的肽序列所属的组；同时用于判定pos_saving的使用与否，解决边界问题（因为pos_saving是进入直接比对流程的）
-	ProIndexMap pimap;
-	for (int i = 0; i < list_pro.size(); i++) {
-		pimap[list_pro[i].nm] = i;
+	ProIndexMap pimap;//NM号为key，index为value
+	for (int i = 0; i < list_pro.size(); i++) {//填表
+		//由于NM号不唯一且相互间以逗号间隔以双引号包围，故应先对其进行处理，剥出一个个单独的NM号，以形成一对一的 <NM号> = 序号 组合
+		string temp = list_pro[i].nm;
+		for (int k = 0; k < temp.length(); k++)
+			if (temp[k] == '"')
+				temp.erase(k, 1);
+		while (temp.find(',')) {
+			int g = temp.find(',');
+			string str;
+			str.assign(temp, 0, g);
+			pimap[str] = i;
+			temp.erase(0, g + 1);
+		}
+		pimap[temp] = i;//将最后一个NM号也录入表中
+		//pimap[list_pro[i].nm] = i;
 	}
 	for (int i = 0; i < list_result.size();) {//更新放在分支末
 		spectra& pep = list_result[i];//起个简单的别名方便编程，提高可读性
@@ -98,9 +111,14 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 					int j = pimap[pep.prot];
 					string temp = list_pro[j].hseq;
 					temp = temp.replace(list_pro[j].pos, 1, 1, list_pro[j].mutataa);
-					string temp2 =pep.prot;//A ?在目标肽链上有多个突变，怎么办？   答：合并全部突变
-					auto pos_find = temp.find(temp2);
-					if (pos_find != string::npos && pos_find + pos_mut == list_pro[j].pos) {//此处pos_mut是result中肽段突变位点的坐标，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
+					mut_pep_inform temp2 = pepmutation(pep);//突变肽链
+					auto pos_find = temp.find(temp2.mutpep);
+					bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
+					for (int i = 0; i < temp2.size; i++) {
+						if (pos_find + temp2.pos_mut[i] == list_pro[j].pos)
+							access = true;
+					}
+					if (pos_find != string::npos && access) {//此处pos_mut是result中肽段突变位点的坐标，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
 						pos_saving = j;
 						mark_saving = pep.marker;
 						cout_modi[mark_saving] = true;
@@ -114,7 +132,7 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 				}
 			}
 		}
-		else {
+		else {//mark_saving与pep.marker相同时
 			if (pep.is_modi == false) {
 				if (list_pro[pos_saving].hseq.find(pep.seq) != string::npos) {
 					cout_no[mark_saving] = true;
@@ -127,13 +145,17 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 				}
 			}
 			else {
-				string temp = list_pro[pos_saving].hseq;
-				temp = temp.replace(list_pro[pos_saving].pos, 1, 1, list_pro[pos_saving].mutataa);//问题A
-				string temp2 = pep.prot;
-				//此处将temp2改为突变序列
 				if (list_pro[pos_saving].nm.find(pep.prot) != string::npos) {
-					auto pos_find = temp.find(temp2);
-					if (pos_find != string::npos && pos_find + pos_mut == list_pro[j].pos) {//此处pos_mut是result中肽段突变位点的坐标，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
+					string temp = list_pro[pos_saving].hseq;
+					temp = temp.replace(list_pro[pos_saving].pos, 1, 1, list_pro[pos_saving].mutataa);//突变蛋白链
+					mut_pep_inform temp2 = pepmutation(pep);//突变肽链
+					auto pos_find = temp.find(temp2.mutpep);
+					bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
+					for (int i = 0; i < temp2.size; i++) {
+						if (pos_find + temp2.pos_mut[i] == list_pro[pos_saving].pos)
+							access = true;
+					}
+					if (pos_find != string::npos && access) {//此处pos_mut是result中肽段突变位点的坐标，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
 						cout_modi[mark_saving] = true;
 						i++;//update
 						break;
@@ -146,7 +168,14 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 			}
 		}
 	}
-	
-		
+	/////输出
+	string outname = "OpenResearch筛选后.txt";
+	ofstream out(outname);
+	for (int i = 0; i < list_result.size(); i++) {
+		if (cout_modi[list_result[i].marker] && cout_no[list_result[i].marker])
+			out << list_result[i];
+	}
+	cout << "Done!" << endl;
+	return 0;
 }
 

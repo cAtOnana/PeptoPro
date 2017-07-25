@@ -99,7 +99,6 @@ void fillnm(istream & is, vector<pro> list)
 	//		}
 	//	}
 	/////以上为老方法，下面尝试hash_map法
-
 	string nmname, enspname;
 	NmEnspMap mymap;
 	string nm_name, ensp_name;

@@ -78,7 +78,7 @@ bool sortbymarker(spectra & a, spectra & b)
 	return a.marker<b.marker;
 }
 
-mut_pep_inform & pepmutation(const spectra & p)
+mut_pep_inform pepmutation(const spectra & p)
 {
 	//文本处理
 	string modi = p.modi;
@@ -101,6 +101,7 @@ mut_pep_inform & pepmutation(const spectra & p)
 		////从哈希表中找到单字符残基对应
 		if (a.mutpep[*a.pos_mut] == ori)
 			a.mutpep[*a.pos_mut] = mut;
+		a.pos_mut++;
 	}
 	return a;
 }
