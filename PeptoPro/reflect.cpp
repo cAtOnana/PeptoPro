@@ -14,9 +14,9 @@ struct str_compare {
 		return a1 == a2;
 	}
 };
-typedef unordered_map<string, string, str_hash, str_compare> NmEnspMap,EnspHseqMap;
+typedef unordered_map<string, string> NmEnspMap,EnspHseqMap;
 //////////////////////////////////////////////////////////////
-istream & operator>>(istream & is, vector<pro> list)
+istream & operator>>(istream & is, vector<pro>& list)
 {
 	pro temp;
 	string waste;
@@ -29,6 +29,8 @@ istream & operator>>(istream & is, vector<pro> list)
 		is >> temp.origaa;
 		is >> temp.mutataa;
 		is >> temp.pos;
+		getline(is,waste);
+		list.push_back(temp);
 	}
 	return is;
 }
@@ -37,7 +39,7 @@ bool sortbyensp(pro & a, pro & b)
 	return a.ensp < b.ensp;
 }
 
-void fillhseq(istream & is, vector<pro> list)
+void fillhseq(istream & is, vector<pro>& list)
 {
 	//sort(list.begin(), list.end(), sortbyensp);
 	//string temp;
@@ -65,7 +67,7 @@ void fillhseq(istream & is, vector<pro> list)
 	EnspHseqMap ehmap;
 	string ensp, hseq;
 	while (is) {//填表
-		while (is.get() != '>')//找'>'
+		while (is.get() != '>'&&is)//找'>'
 			continue;
 		is >> ensp >> hseq;
 		ehmap[ensp] = hseq;
@@ -76,7 +78,7 @@ void fillhseq(istream & is, vector<pro> list)
 	}
 }
 
-void fillnm(istream & is, vector<pro> list)
+void fillnm(istream & is, vector<pro>& list)
 {
 	//sort(list.begin(), list.end(), sortbyensp);
 	//string temp;
@@ -106,10 +108,15 @@ void fillnm(istream & is, vector<pro> list)
 		is >> nm_name;
 		mymap[ensp_name] = nm_name;
 	}
+	int no = 0;
 	for (int i = 0; i < list.size(); i++){
 		if (mymap.find(list[i].ensp) != mymap.end())
 			list[i].nm = mymap[list[i].ensp];
 		else
-			cout << "没有找到" << list[i].ensp << "相对应的NM号。";
+		{
+			cout << "没有找到" << list[i].ensp << "相对应的NM号。" << endl;
+			no++;
+		}
 	}
+	cout << no << endl;
 }

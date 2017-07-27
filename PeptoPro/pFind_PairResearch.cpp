@@ -1,5 +1,8 @@
 #include"pFind_PairResearch.h"
 #include<algorithm>
+#include<unordered_map>
+#include<fstream>
+#include<iostream>
 ostream & operator<<(ostream & os, const spectra & s)
 {
 	os << s.file_name << "	" << s.scan_no << "	" << s.exp_mh << "	" << s.charge << "	" << s.q_value << "	" << s.seq << "	"
@@ -78,7 +81,7 @@ bool sortbymarker(spectra & a, spectra & b)
 	return a.marker<b.marker;
 }
 
-mut_pep_inform pepmutation(const spectra & p)
+mut_pep_inform pepmutation(const spectra & p, ifstream& intri)
 {
 	//文本处理
 	string modi = p.modi;
@@ -87,6 +90,13 @@ mut_pep_inform pepmutation(const spectra & p)
 		a.size = p.mut_count;
 		a.pos_mut = new int[a.size]{ 0 }; 
 	string section;
+	unordered_map<string, char> table;
+	string tri; 
+	char mono;
+	while (intri >> tri) {
+		intri >> mono;
+		table[tri] = mono;
+	}
 	while (modi.find("->") != string::npos && modi.find(';') != string::npos) {
 		int end_sign = modi.find(';'), mut_sign = modi.find('>');
 		section.assign(modi, 0, end_sign + 1);
@@ -96,12 +106,32 @@ mut_pep_inform pepmutation(const spectra & p)
 		section.erase(0, section.find(',') + 1);
 		string ori_res, mut_res;
 		ori_res.assign(section, 0, 3);
-		mut_res.assign(section, mut_sign + 1, 3);
+		mut_res.assign(section, mut_sign + 1, 3); 
 		char ori, mut;
-		////从哈希表中找到单字符残基对应
+		if (table.find(ori_res) != table.end() && table.find(mut_res) != table.end()) {
+			ori = table[ori_res], mut = table[mut_res];
+		}
+		else
+			std::cout << "有找不到缩写的残基，其名为：" << ori_res << std::endl;
 		if (a.mutpep[*a.pos_mut] == ori)
 			a.mutpep[*a.pos_mut] = mut;
 		a.pos_mut++;
 	}
 	return a;
 }
+
+struct tri_hash{
+	size_t operator()(const string & str)const {
+		int _h = 0;
+		for (int i = 0; i < str.length(); i++) {
+			_h = _h * 2 + str[i] - 65;
+		}
+		return _h;
+	}
+};
+
+struct tri_compare{
+	bool operator()(const string& a1, const string& a2)const {
+		return a1 == a2;
+	}
+};

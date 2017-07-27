@@ -37,4 +37,4 @@ istream& operator>>(istream& os, vector<spectra>& list_result);
 int mark(vector<spectra>& list);
 bool sortbyleg(spectra& a, spectra& b);
 bool sortbymarker(spectra& a, spectra& b);
-mut_pep_inform pepmutation(const spectra& p);
+mut_pep_inform pepmutation(const spectra& p,ifstream& intri);

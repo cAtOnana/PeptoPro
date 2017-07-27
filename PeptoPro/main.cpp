@@ -4,8 +4,8 @@
 #include<unordered_map>
 //result文件中肽段是以nm号标记的，非同义突变文件中的蛋白质序列是以ensp号标记的，现通过清理空白项后的对照表建立映射将两者对应起来后进行比对；无突变的肽段直接比对即可，有突变的肽段先在对应蛋白质序列中进行突变转换然后比对
 using namespace std;
-int argc = 5;
-char* argv[5] = { "aaa","result.txt","非同义突变.txt","ENSP-NM.txt","Homo_sapiens.GRCh38.pep.all_cnew.fa" };
+int argc = 6;
+char* argv[6] = { "aaa","result.txt","非同义突变.txt","ENSP-NM.txt","Homo_sapiens.GRCh38.pep.all_cnew.fa","三字表.txt" };
 struct pro_hash {
 	size_t operator()(const string& str) const {
 		int _hash_value = 0;
@@ -19,11 +19,11 @@ struct pro_compare {
 		return a1==a2;//试试此处不是相等判断而是包含判断时是否可行
 	}
 };
-typedef unordered_map<string, int, pro_hash, pro_compare> ProIndexMap;
+typedef unordered_map<string, int> ProIndexMap;
 int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列fasta
 	char* logname = "PeptoPro.log";
 	ofstream log(logname);
-	if (argc != 5) {
+	if (argc != 6) {
 		cout << "参数数目异常，程序退出。\n";
 		log << "参数数目异常，程序退出。\n";
 		exit(EXIT_FAILURE);
@@ -50,6 +50,13 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 	if (!inref.is_open()) {
 		cout << argv[4] << "打开失败，程序退出\n";
 		log << argv[4]<< "打开失败，程序退出\n";
+		exit(EXIT_FAILURE);
+	}
+	//三字表 单子表文件名；用tab分隔
+	ifstream intri(argv[5]);//输入三字表和单子表对应
+	if (!intri.is_open()) {
+		cout << argv[5] << "打开失败，程序退出\n";
+		log << argv[5] << "打开失败，程序退出\n";
 		exit(EXIT_FAILURE);
 	}
 	vector<spectra> list_result;
@@ -85,7 +92,6 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 			temp.erase(0, g + 1);
 		}
 		pimap[temp] = i;//将最后一个NM号也录入表中
-		//pimap[list_pro[i].nm] = i;
 	}
 	for (int i = 0; i < list_result.size();) {//更新放在分支末
 		spectra& pep = list_result[i];//起个简单的别名方便编程，提高可读性
@@ -111,7 +117,7 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 					int j = pimap[pep.prot];
 					string temp = list_pro[j].hseq;
 					temp = temp.replace(list_pro[j].pos, 1, 1, list_pro[j].mutataa);
-					mut_pep_inform temp2 = pepmutation(pep);//突变肽链
+					mut_pep_inform temp2 = pepmutation(pep,intri);//突变肽链
 					auto pos_find = temp.find(temp2.mutpep);
 					bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
 					for (int i = 0; i < temp2.size; i++) {
@@ -148,7 +154,7 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 				if (list_pro[pos_saving].nm.find(pep.prot) != string::npos) {
 					string temp = list_pro[pos_saving].hseq;
 					temp = temp.replace(list_pro[pos_saving].pos, 1, 1, list_pro[pos_saving].mutataa);//突变蛋白链
-					mut_pep_inform temp2 = pepmutation(pep);//突变肽链
+					mut_pep_inform temp2 = pepmutation(pep,intri);//突变肽链
 					auto pos_find = temp.find(temp2.mutpep);
 					bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
 					for (int i = 0; i < temp2.size; i++) {
@@ -176,6 +182,8 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 			out << list_result[i];
 	}
 	cout << "Done!" << endl;
+	char a;
+	cin >> a;
 	return 0;
 }
 

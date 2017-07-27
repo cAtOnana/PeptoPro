@@ -15,7 +15,7 @@ struct pro {
 };
 
 
-istream& operator>>(istream& is, vector<pro> list);
+istream& operator>>(istream& is, vector<pro>& list);
 bool sortbyensp(pro& a, pro& b);
-void fillhseq(istream& is,vector<pro> list);
-void fillnm(istream&is, vector<pro>list);
+void fillhseq(istream& is,vector<pro>& list);
+void fillnm(istream&is, vector<pro>&list);
