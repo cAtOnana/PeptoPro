@@ -24,7 +24,7 @@ struct spectra
 	double afm_shift;
 	int others;
 	int marker = 0;
-	bool is_modi = false;
+	bool is_mut = false;
 	int mut_count=0;//记录突变位点个数
 };
 struct mut_pep_inform {

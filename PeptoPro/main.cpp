@@ -96,7 +96,7 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 	for (int i = 0; i < list_result.size();) {//更新放在分支末
 		spectra& pep = list_result[i];//起个简单的别名方便编程，提高可读性
 		if (pep.marker != mark_saving) {
-			if (pep.is_modi == false) {
+			if (pep.is_mut == false) {
 				if (pimap.find(pep.prot) != pimap.end()) {//找到了的话
 					int j = pimap[pep.prot];
 					if (list_pro[j].nm.find(pep.prot) != string::npos) {
@@ -139,7 +139,7 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 			}
 		}
 		else {//mark_saving与pep.marker相同时
-			if (pep.is_modi == false) {
+			if (pep.is_mut == false) {
 				if (list_pro[pos_saving].hseq.find(pep.seq) != string::npos) {
 					cout_no[mark_saving] = true;
 					i++;//update

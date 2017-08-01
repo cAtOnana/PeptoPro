@@ -33,7 +33,8 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 		{
 			in >> temp.modi;
 			temp.modi = ch + temp.modi;
-			temp.is_modi = true;
+			if(temp.modi.find("->")!=string::npos)
+				temp.is_mut = true;
 		}
 		in >> temp.spec;
 		in >> temp.prot;
