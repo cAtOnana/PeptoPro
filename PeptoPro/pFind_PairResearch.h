@@ -1,6 +1,7 @@
 #pragma once
 #include<string>
 #include<vector>
+#include<unordered_map>
 using namespace std;
 struct spectra
 {
@@ -25,6 +26,7 @@ struct spectra
 	int others;
 	int marker = 0;
 	bool is_mut = false;
+	bool outputable = true;
 	int mut_count=0;//记录突变位点个数
 };
 struct mut_pep_inform {
@@ -37,4 +39,4 @@ istream& operator>>(istream& os, vector<spectra>& list_result);
 int mark(vector<spectra>& list);
 bool sortbyleg(spectra& a, spectra& b);
 bool sortbymarker(spectra& a, spectra& b);
-mut_pep_inform pepmutation(const spectra& p,ifstream& intri);
+mut_pep_inform pepmutation(const spectra& p,ifstream& intri, unordered_map<string, char>& table);
