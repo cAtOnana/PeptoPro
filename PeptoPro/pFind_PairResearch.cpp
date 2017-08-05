@@ -15,7 +15,8 @@ ostream & operator<<(ostream & os, const spectra & s)
 istream & operator>>(istream & in, vector<spectra> & list_result)
 {
 	char ch;
-	spectra temp;
+	spectra temp;//虽然是每次初始化，但在优化下会变成每次初始化都占用同一内存区域，从而使is_mut,modi等变量
+	//直到赋值前都会保留上一次的值（因为内存恰好对上了）；因此对后续步骤有决定性作用的is_mut值，更应该用完整的if else语句重新赋值
 	while (in >> temp.file_name) {
 		in >> temp.scan_no;
 		in >> temp.exp_mh;
@@ -37,6 +38,8 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 				temp.is_mut = true;
 				//std::cout << temp.modi.find<< std::endl;
 			}
+			else
+				temp.is_mut = false;
 		}
 		in >> temp.spec;
 		in >> temp.prot;

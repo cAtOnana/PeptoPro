@@ -265,3 +265,5 @@ __pycache__/
 /PeptoPro/非同义突变.txt
 /PeptoPro/三字表.txt
 /PeptoPro/OpenResearch筛选后.txt
+/PeptoPro/all_openresearch_data_esemble_pairfinding_result.txt
+*.txt

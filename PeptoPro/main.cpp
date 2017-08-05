@@ -62,8 +62,6 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 	vector<spectra> list_result;
 	inres >> list_result;
 	int markcount =mark(list_result);
-	for (int i = 0; i < list_result.size();i++)
-		log << list_result[i];
 
 	vector<pro> list_pro;
 	inmrn >> list_pro;
