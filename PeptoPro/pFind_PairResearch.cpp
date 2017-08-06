@@ -3,6 +3,7 @@
 #include<unordered_map>
 #include<fstream>
 #include<iostream>
+static const int Utf8_ONE = 49;//UTF-8中，字符‘1’的编码是49
 ostream & operator<<(ostream & os, const spectra & s)
 {
 	os << s.file_name << "	" << s.scan_no << "	" << s.exp_mh << "	" << s.charge << "	" << s.q_value << "	" << s.seq << "	"
@@ -33,10 +34,9 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 		else
 		{
 			in >> temp.modi;
-			temp.modi = ch + temp.modi;
+			//temp.modi = ch + temp.modi;//修饰项由一对双引号包含，为保证提取突变信息时方便，此处舍弃前双引号
 			if (temp.modi.find(">") != string::npos) {
 				temp.is_mut = true;
-				//std::cout << temp.modi.find<< std::endl;
 			}
 			else
 				temp.is_mut = false;
@@ -96,17 +96,21 @@ mut_pep_inform pepmutation(const spectra & p, ifstream& intri, unordered_map<str
 		a.mutpep = p.seq;
 		a.size = p.mut_count;
 		a.pos_mut = new int[a.size]{ 0 }; 
+	//
+		cout << a.mutpep << endl << a.size;
+	//
 	string section;
+	int order = 0;
 	while (modi.find(">") != string::npos && modi.find(";") != string::npos) {
 		int end_sign = modi.find(";");
 		section = modi.substr(0, end_sign + 1);
 		modi.erase(0, end_sign + 1);
 		for (int i = 0; section[i] != ','; i++)//得到突变坐标，存于pos_mut中
-			*a.pos_mut = *a.pos_mut * 10 + section[i] - 49;
+			a.pos_mut[order] = a.pos_mut[order] * 10 + section[i] - Utf8_ONE;//用字符编码减去‘1’的编码，得到的差值就是从0开始计算的突变位；例如‘8’(从1算起的字符串突变位)-‘1’=7(从0算起的字符串突变位)
 		section.erase(0, section.find(',') + 1);
 		string ori_res, mut_res;
 		ori_res=section.substr( 0, 3);
-		int mut_sign = modi.find(">");
+		int mut_sign = section.find(">");
 		mut_res=section.substr(mut_sign + 1, 3); 
 		char ori, mut;
 		if (table.find(ori_res) != table.end() && table.find(mut_res) != table.end()) {
@@ -115,9 +119,9 @@ mut_pep_inform pepmutation(const spectra & p, ifstream& intri, unordered_map<str
 		}
 		else
 			std::cout << "有找不到缩写的残基，其名为：" <<mut_res << std::endl;
-		if (a.mutpep[*a.pos_mut] == ori)
-			a.mutpep[*a.pos_mut] = mut;
-		a.pos_mut++;
+		if (a.mutpep[a.pos_mut[order]] == ori)
+			a.mutpep[a.pos_mut[order]] = mut;
+		order++;
 		ori_res.~basic_string();
 		mut_res.~basic_string();
 	}
