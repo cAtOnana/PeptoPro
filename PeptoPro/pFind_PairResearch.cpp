@@ -97,7 +97,7 @@ mut_pep_inform pepmutation(const spectra & p, ifstream& intri, unordered_map<str
 		a.size = p.mut_count;
 		a.pos_mut = new int[a.size]{ 0 }; 
 	//
-		cout << a.mutpep << endl << a.size;
+	//	cout << a.mutpep << endl << a.size;
 	//
 	string section;
 	int order = 0;

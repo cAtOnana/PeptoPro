@@ -11,9 +11,7 @@ struct pro {
 	char mutataa;
 	int pos;
 	std::string hseq="";
-	std::string nm;
 };
-
 
 istream& operator>>(istream& is, vector<pro>& list);
 bool sortbyensp(pro& a, pro& b);
