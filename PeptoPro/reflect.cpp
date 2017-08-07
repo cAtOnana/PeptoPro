@@ -41,29 +41,6 @@ bool sortbyensp(pro & a, pro & b)
 
 void fillhseq(istream & is, vector<pro>& list)
 {
-	//sort(list.begin(), list.end(), sortbyensp);
-	//string temp;
-	//int a = 0;
-	//int b = list.size();
-	//int mid = (a + b) / 2;
-	//while (is.get()=='>') {
-	//	is >> temp;
-	//	while (a < b) {//二分法迅速确认位置
-	//		if (list[mid].ensp == temp) {
-	//			is >> list[mid].hseq;
-	//			break;
-	//		}
-	//		else if (temp > list[mid].ensp) {
-	//			a = mid;
-	//			mid = (a + b) / 2;
-	//		}
-	//		else if (temp < list[mid].ensp) {
-	//			b = mid;
-	//			mid = (a + b) / 2;
-	//		}
-	//	}
-	//}
-	////以上为老方法，下面尝试hash_map法
 	EnspHseqMap ehmap;
 	string ensp, hseq;
 	while (is) {//填表
