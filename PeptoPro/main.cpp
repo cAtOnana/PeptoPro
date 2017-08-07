@@ -6,7 +6,7 @@
 //result文件中肽段是以nm号标记的，非同义突变文件中的蛋白质序列是以ensp号标记的，现通过清理空白项后的对照表建立映射将两者对应起来后进行比对；无突变的肽段直接比对即可，有突变的肽段先在对应蛋白质序列中进行突变转换然后比对
 using namespace std;
 int argc = 6;
-char* argv[6] = { "aaa","all_SAPTheory_data_ensemble_pairfinding_result.txt","非同义突变.txt","ENSP-NM.txt","Homo_sapiens.GRCh38.pep.all_cnew.fa","三字表.txt" };
+char* argv[6] = { "aaa","all_openresearch_data_esemble_pairfinding_result.txt","非同义突变.txt","ENSP-NM.txt","Homo_sapiens.GRCh38.pep.all_cnew.fa","三字表.txt" };
 struct pro_hash {
 	size_t operator()(const string& str) const {
 		int _hash_value = 0;
@@ -128,11 +128,11 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 					mut_pep_inform temp2 = pepmutation(pep,intri,table);//突变肽链
 					for (int i = 0; i < j.size(); i++) {//循环突变蛋白质序列并比对
 						string temp = list_pro[j[i]].hseq;
-						temp = temp.replace(list_pro[j[i]].pos, 1, 1, list_pro[j[i]].mutataa);
+						temp = temp.replace(list_pro[j[i]].pos-1, 1, 1, list_pro[j[i]].mutataa);//.pos项要-1才是正确的cpp下标
 						auto pos_find = temp.find(temp2.mutpep);
 						bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
-						for (int i = 0; i < temp2.size; i++) {//此处pos_mut是result中肽段突变位点的坐标(0起始)，与匹配起始位点坐标（pos_find）（同样是0起始）相加应等于蛋白质序列上突变位点坐标
-							if (pos_find + temp2.pos_mut[i] == list_pro[j[i]].pos)
+						for (int i = 0; i < temp2.size; i++) {//此处pos_mut是result中肽段突变位点的坐标(0起始)，与匹配起始位点坐标（pos_find）（同样是0起始）相加应等于蛋白质序列上突变位点坐标（0起始）
+							if (pos_find + temp2.pos_mut[i] == list_pro[j[i]].pos-1)//.pos项要-1才是正确的cpp下标
 								access = true;
 						}
 						if (pos_find != string::npos && access) {
@@ -151,7 +151,7 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 			}
 		}
 	/////输出
-	string outname = "理论突变筛选后.txt";
+	string outname = "openresearch筛选后.txt";
 	ofstream out(outname);
 	for (int i = 0; i < list_result.size(); i++) {
 		if (cout_modi[list_result[i].marker] && cout_no[list_result[i].marker]&& list_result[i].outputable)
