@@ -128,11 +128,11 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 					mut_pep_inform temp2 = pepmutation(pep,intri,table);//突变肽链
 					for (int i = 0; i < j.size(); i++) {//循环突变蛋白质序列并比对
 						string temp = list_pro[j[i]].hseq;
-						temp = temp.replace(list_pro[j[i]].pos-1, 1, 1, list_pro[j[i]].mutataa);//.pos项要-1才是正确的cpp下标
+						temp = temp.replace(list_pro[j[i]].pos, 1, 1, list_pro[j[i]].mutataa);
 						auto pos_find = temp.find(temp2.mutpep);
 						bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
 						for (int i = 0; i < temp2.size; i++) {//此处pos_mut是result中肽段突变位点的坐标(0起始)，与匹配起始位点坐标（pos_find）（同样是0起始）相加应等于蛋白质序列上突变位点坐标（0起始）
-							if (pos_find + temp2.pos_mut[i] == list_pro[j[i]].pos-1)//.pos项要-1才是正确的cpp下标
+							if (pos_find + temp2.pos_mut[i] == list_pro[j[i]].pos)
 								access = true;
 						}
 						if (pos_find != string::npos && access) {
