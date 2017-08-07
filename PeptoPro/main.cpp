@@ -6,7 +6,7 @@
 //result文件中肽段是以nm号标记的，非同义突变文件中的蛋白质序列是以ensp号标记的，现通过清理空白项后的对照表建立映射将两者对应起来后进行比对；无突变的肽段直接比对即可，有突变的肽段先在对应蛋白质序列中进行突变转换然后比对
 using namespace std;
 int argc = 6;
-char* argv[6] = { "aaa","all_openresearch_data_esemble_pairfinding_result.txt","非同义突变.txt","ENSP-NM.txt","Homo_sapiens.GRCh38.pep.all_cnew.fa","三字表.txt" };
+char* argv[6] = { "aaa","all_SAPTheory_data_ensemble_pairfinding_result.txt","非同义突变.txt","ENSP-NM.txt","Homo_sapiens.GRCh38.pep.all_cnew.fa","三字表.txt" };
 struct pro_hash {
 	size_t operator()(const string& str) const {
 		int _hash_value = 0;
@@ -87,21 +87,6 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 			ensp = list_pro[i + 1].ensp;
 			index.clear();
 		}
-		//pimap[list_pro[i].ensp] = i;
-		///以下为用NM号建立索引的版本
-		//由于NM号不唯一且相互间以逗号间隔以双引号包围，故应先对其进行处理，剥出一个个单独的ENSP号，以形成一对一的 <ENSP号> = 序号 组合
-		//string temp = list_pro[i].nm;
-		//for (int k = 0; k < temp.length(); k++)
-		//	if (temp[k] == '"')
-		//		temp.erase(k, 1);
-		//while (temp.find(',')) {
-		//	int g = temp.find(',');
-		//	string str;
-		//	str.assign(temp, 0, g);
-		//	pimap[str] = i;
-		//	temp.erase(0, g + 1);
-		//}
-		//pimap[temp] = i;//将最后一个NM号也录入表中
 	}
 	//构建三字表-单字表映射
 	unordered_map<string, char> table;
@@ -114,7 +99,6 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 	bool* cout_modi = new bool[markcount] {false};
 	bool* cout_no = new bool[markcount] {false};
 	///此两数组用于记录某一mark号对应的数据组能否输出，只有两者皆为true（即某一组中至少有一对经过验证的突变对）才能输出。故比对时也应按照此原则对应地更新数组。
-	vector<int> pos_saving;
 	int mark_saving = 0;
 	for (int i = 0; i < list_result.size();i++) {
 		spectra& pep = list_result[i];//起个简单的别名方便编程，提高可读性
@@ -129,6 +113,8 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 							cout_no[mark_saving] = true;
 							break;
 						}
+						else
+							list_result[i].outputable = false;
 					}					
 				}
 					else {
@@ -145,7 +131,7 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 						temp = temp.replace(list_pro[j[i]].pos, 1, 1, list_pro[j[i]].mutataa);
 						auto pos_find = temp.find(temp2.mutpep);
 						bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
-						for (int i = 0; i < temp2.size; i++) {//此处pos_mut是result中肽段突变位点的坐标(0起始)，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
+						for (int i = 0; i < temp2.size; i++) {//此处pos_mut是result中肽段突变位点的坐标(0起始)，与匹配起始位点坐标（pos_find）（同样是0起始）相加应等于蛋白质序列上突变位点坐标
 							if (pos_find + temp2.pos_mut[i] == list_pro[j[i]].pos)
 								access = true;
 						}
@@ -161,57 +147,15 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 				}
 				else {
 					list_result[i].outputable = false;
-					//vector<spectra>::iterator itor = list_result.begin() + i;
-					//list_result.erase(itor);// erase & update
 				}
 			}
 		}
-//		else {//mark_saving与pep.marker相同时
-//			if (pep.is_mut == false) {
-//				for (int i = 0; i < pos_saving.size(); i++) {
-//					if (list_pro[pos_saving[i]].hseq.find(pep.seq) != string::npos) {
-//						cout_no[mark_saving] = true;
-//						break;
-//					}
-//					else {
-//						list_result[i].outputable = false;
-//						//vector<spectra>::iterator itor = list_result.begin() + i;
-//						//list_result.erase(itor);// erase & update
-//					}
-//				}
-//			}
-//			else {
-//				
-//					mut_pep_inform temp2 = pepmutation(pep, intri, table);//突变肽链
-//					for (int i = 0; i < pos_saving.size(); i++) {
-//						string temp = list_pro[pos_saving[i]].hseq;
-//						temp = temp.replace(list_pro[pos_saving[i]].pos, 1, 1, list_pro[pos_saving[i]].mutataa);//突变蛋白链
-//						auto pos_find = temp.find(temp2.mutpep);
-//						bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
-//						for (int i = 0; i < temp2.size; i++) {
-//							if (pos_find + temp2.pos_mut[i] == list_pro[pos_saving[i]].pos)
-//								access = true;
-//						}
-//						if (pos_find != string::npos && access) {//此处pos_mut是result中肽段突变位点的坐标，与匹配起始位点坐标（pos_find）相加应等于蛋白质序列上突变位点坐标
-//							cout_modi[mark_saving] = true;
-//							break;
-//						}
-//					}
-//				
-//				else {
-//					list_result[i].outputable = false;
-//					//vector<spectra>::iterator itor = list_result.begin() + i;
-//					//list_result.erase(itor);// erase & update
-//				}
-	//		}
-	//	}
-//	}
 	/////输出
-	string outname = "OpenResearch筛选后.txt";
+	string outname = "理论突变筛选后.txt";
 	ofstream out(outname);
 	for (int i = 0; i < list_result.size(); i++) {
 		if (cout_modi[list_result[i].marker] && cout_no[list_result[i].marker]&& list_result[i].outputable)
-			out << list_result[i];
+			out << list_result[i]<<endl;
 	}
 	cout << "Done!" << endl;
 	char a;
