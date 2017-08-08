@@ -125,18 +125,20 @@ int main(){//int argc, char* argv[]) {//result mrna非同义突变 对照表 蛋白质序列f
 			else {//类似上面
 				if (pimap.find(pep.prot)!=pimap.end()) {//先找后改，高效
 					vector<int> j = pimap[pep.prot];
-					mut_pep_inform temp2 = pepmutation(pep,intri,table);//突变肽链
+					//当处理openresearch数据时，启用暗绿语句
+					///mut_pep_inform temp2 = pepmutation(pep,intri,table);//突变肽链
 					for (int i = 0; i < j.size(); i++) {//循环突变蛋白质序列并比对
 						string temp = list_pro[j[i]].hseq;
 						temp = temp.replace(list_pro[j[i]].pos, 1, 1, list_pro[j[i]].mutataa);
-						auto pos_find = temp.find(temp2.mutpep);
-						bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
-						for (int i = 0; i < temp2.size; i++) {//此处pos_mut是result中肽段突变位点的坐标(0起始)，与匹配起始位点坐标（pos_find）（同样是0起始）相加应等于蛋白质序列上突变位点坐标（0起始）
-							if (pos_find + temp2.pos_mut[i] == list_pro[j[i]].pos)
-								access = true;
-						}
-						if (pos_find != string::npos && access) {
-							//pos_saving = j;
+						///auto pos_find = temp.find(temp2.mutpep);
+					//当处理理论突变数据时，启用暗绿语句
+						auto pos_find = temp.find(pep.seq);
+						///bool access = false;//此变量用于判定是否有至少一个肽段突变位点与蛋白质突变位点重合
+						///for (int i = 0; i < temp2.size; i++) {//此处pos_mut是result中肽段突变位点的坐标(0起始)，与匹配起始位点坐标（pos_find）（同样是0起始）相加应等于蛋白质序列上突变位点坐标（0起始）
+						///	if (pos_find + temp2.pos_mut[i] == list_pro[j[i]].pos)
+						///		access = true;
+						///}
+						if (pos_find != string::npos){ ///&& access) {
 							mark_saving = pep.marker;
 							cout_modi[mark_saving] = true;
 							break;

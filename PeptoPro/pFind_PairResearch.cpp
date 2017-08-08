@@ -35,14 +35,20 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 		{
 			in >> temp.modi;
 			//temp.modi = ch + temp.modi;//修饰项由一对双引号包含，为保证提取突变信息时方便，此处舍弃前双引号
-			if (temp.modi.find(">") != string::npos) {
-				temp.is_mut = true;
-			}
-			else
-				temp.is_mut = false;
+			//当处理openresearch结果时，启用暗绿语句
+			///if (temp.modi.find(">") != string::npos) {
+			///	temp.is_mut = true;
+			///}
+			///else
+			///	temp.is_mut = false;
 		}
 		in >> temp.spec;
 		in >> temp.prot;
+		//当处理理论突变结果时，启用暗绿语句
+		if (temp.prot.find("_SAP") != string::npos)
+			temp.is_mut = true;
+		else
+			temp.is_mut = false;
 		temp.prot=temp.prot.substr( temp.prot.find("ENSP"), 15);
 		in >> temp.posi;
 		in >> temp.label;
@@ -50,7 +56,8 @@ istream & operator>>(istream & in, vector<spectra> & list_result)
 		in >> temp.mc_sites;
 		in >> temp.afm_shift;
 		in >> temp.others;
-		in >> temp.mut_count;
+		//当处理openresearch结果时，启用暗绿语句
+		///in >> temp.mut_count;
 		list_result.push_back(temp);
 	}
 	return in;
